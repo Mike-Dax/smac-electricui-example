@@ -6,66 +6,153 @@ import {
   VerticalAxis,
 } from '@electricui/components-desktop-charts'
 
-import { Card } from '@blueprintjs/core'
+import { Card, Colors } from '@blueprintjs/core'
 import { Composition } from 'atomic-layout'
-import { IntervalRequester } from '@electricui/components-core'
-import { LightBulb } from '../../components/LightBulb'
+import { IntervalRequester, PollOnce } from '@electricui/components-core'
 import { useMessageDataSource } from '@electricui/core-timeseries'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { Slider } from '@electricui/components-desktop-blueprint'
+import { Printer } from '@electricui/components-desktop'
+import { AddressFilter } from '../../components/AddressFilter'
 
 const layoutDescription = `
-  Chart Chart
-  Light Slider
+  SectionA SectionB SectionC
 `
 
 export const OverviewPage = (props: RouteComponentProps) => {
-  const ledStateDataSource = useMessageDataSource('led_state')
+  const noiseDs = useMessageDataSource('0x6077')
 
   return (
     <React.Fragment>
-      <IntervalRequester interval={50} messageIDs={['led_state']} />
-
       <Composition areas={layoutDescription} gap={10} autoCols="1fr">
         {Areas => (
           <React.Fragment>
-            <Areas.Chart>
+            <Areas.SectionA>
               <Card>
-                <div style={{ textAlign: 'center', marginBottom: '1em' }}>
-                  <b>LED State</b>
-                </div>
-                <ChartContainer>
-                  <LineChart dataSource={ledStateDataSource} />
-                  <RealTimeDomain window={10000} />
-                  <TimeAxis />
-                  <VerticalAxis />
-                </ChartContainer>
-              </Card>
-            </Areas.Chart>
+                <p style={{ textAlign: 'center' }}>address 0x01</p>
+                <AddressFilter address="0x01">
+                  <IntervalRequester
+                    messageIDs={['0x6077', '0xA2C00']}
+                    interval={100}
+                  />
 
-            <Areas.Light>
-              <LightBulb
-                containerStyle={{ margin: '20px auto', width: '80%' }}
-                width="40vw"
-              />
-            </Areas.Light>
+                  <ChartContainer>
+                    <LineChart
+                      dataSource={noiseDs}
+                      color={Colors.RED4}
+                      maxItems={50000}
+                    />
+                    <RealTimeDomain window={[1_000, 5_000, 10_000]} />
+                    <TimeAxis />
+                    <VerticalAxis />
+                  </ChartContainer>
 
-            <Areas.Slider>
-              <Card>
-                <div style={{ margin: 20 }}>
+                  <p>
+                    0x6077: <Printer accessor="0x6077" />
+                  </p>
+
+                  <PollOnce messageID="0xA2C00" />
                   <Slider
-                    min={20}
-                    max={1020}
-                    stepSize={10}
+                    min={1}
+                    max={1000}
+                    stepSize={1}
                     labelStepSize={100}
                     sendOnlyOnRelease
                   >
-                    <Slider.Handle accessor="lit_time" />
+                    <Slider.Handle accessor="0xA2C00" />
                   </Slider>
-                </div>
+
+                  <p>
+                    0xA2C00: <Printer accessor="0xA2C00" />
+                  </p>
+                </AddressFilter>
               </Card>
-            </Areas.Slider>
+            </Areas.SectionA>
+
+            <Areas.SectionB>
+              <Card>
+                <p style={{ textAlign: 'center' }}>address 0x02</p>
+                <AddressFilter address="0x02">
+                  <IntervalRequester
+                    messageIDs={['0x6077', '0xA2C00']}
+                    interval={100}
+                  />
+
+                  <ChartContainer>
+                    <LineChart
+                      dataSource={noiseDs}
+                      color={Colors.GREEN4}
+                      maxItems={50000}
+                    />
+                    <RealTimeDomain window={[1_000, 5_000, 10_000]} />
+                    <TimeAxis />
+                    <VerticalAxis />
+                  </ChartContainer>
+
+                  <p>
+                    0x6077: <Printer accessor="0x6077" />
+                  </p>
+
+                  <PollOnce messageID="0xA2C00" />
+                  <Slider
+                    min={1}
+                    max={1000}
+                    stepSize={1}
+                    labelStepSize={100}
+                    sendOnlyOnRelease
+                  >
+                    <Slider.Handle accessor="0xA2C00" />
+                  </Slider>
+
+                  <p>
+                    0xA2C00: <Printer accessor="0xA2C00" />
+                  </p>
+                </AddressFilter>
+              </Card>
+            </Areas.SectionB>
+
+            <Areas.SectionC>
+              <Card>
+                <p style={{ textAlign: 'center' }}>address 0x20</p>
+                <AddressFilter address="0x20">
+                  <IntervalRequester
+                    messageIDs={['0x6077', '0xA2C00']}
+                    interval={100}
+                  />
+
+                  <ChartContainer>
+                    <LineChart
+                      dataSource={noiseDs}
+                      color={Colors.BLUE4}
+                      maxItems={50000}
+                    />
+                    <RealTimeDomain window={[1_000, 5_000, 10_000]} />
+                    <TimeAxis />
+                    <VerticalAxis />
+                  </ChartContainer>
+
+                  <p>
+                    0x6077: <Printer accessor="0x6077" />
+                  </p>
+
+                  <PollOnce messageID="0xA2C00" />
+                  <Slider
+                    min={1}
+                    max={1000}
+                    stepSize={1}
+                    labelStepSize={100}
+                    sendOnlyOnRelease
+                  >
+                    <Slider.Handle accessor="0xA2C00" />
+                  </Slider>
+
+                  <p>
+                    0xA2C00: <Printer accessor="0xA2C00" />
+                  </p>
+                </AddressFilter>
+              </Card>
+            </Areas.SectionC>
           </React.Fragment>
         )}
       </Composition>

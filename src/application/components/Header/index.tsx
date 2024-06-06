@@ -16,9 +16,7 @@ interface InjectDeviceIDFromLocation {
   '*'?: string // we get passed the path as the wildcard
 }
 
-export const Header = (
-  props: RouteComponentProps & InjectDeviceIDFromLocation,
-) => {
+export const Header = (props: RouteComponentProps & InjectDeviceIDFromLocation) => {
   const disconnect = useDeviceDisconnect()
   const connect = useDeviceConnect()
   const connectionRequested = useDeviceConnectionRequested()
@@ -31,16 +29,6 @@ export const Header = (
       <Navbar style={{ background: 'transparent', boxShadow: 'none' }}>
         <div style={{ margin: '0 auto', width: '100%' }}>
           <Navbar.Group align={Alignment.LEFT}>
-            <Button
-              minimal
-              large
-              icon={IconNames.HOME}
-              text="Back"
-              onClick={() => {
-                navigate('/')
-              }}
-            />
-
             {connectionRequested ? (
               <Button
                 minimal

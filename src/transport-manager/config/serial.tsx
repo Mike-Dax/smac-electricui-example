@@ -1,124 +1,52 @@
 import {
-  BinaryPipeline,
-  BinaryTypeCachePipeline,
-  DeliverabilityManagerBinaryProtocol,
-  QueryManagerBinaryProtocol,
-  UndefinedMessageIDGuardPipeline,
-} from '@electricui/protocol-binary'
-import {
   ConnectionInterface,
   ConnectionStaticMetadataReporter,
+  DeliverabilityManagerOneShot,
   DiscoveryHintConsumer,
   Hint,
+  QueryManagerNone,
   TransportFactory,
-  TypeCache,
 } from '@electricui/core'
 import {
   SerialPortHintConfiguration,
   SerialPortHintIdentification,
-  SerialPortHintProducer,
-  SerialPortUSBHintTransformer,
   SerialTransport,
   SerialTransportOptions,
 } from '@electricui/transport-node-serial'
 
-import { BinaryLargePacketHandlerPipeline } from '@electricui/protocol-binary-large-packet-handler'
-import { COBSPipeline } from '@electricui/protocol-binary-cobs'
-import { HeartbeatConnectionMetadataReporter } from '@electricui/protocol-binary-heartbeats'
 import { SerialPort } from 'serialport'
-import { usb } from 'usb'
-import { USBHintProducer } from '@electricui/transport-node-usb-discovery'
-import { LEDCodec } from './codecs'
-import { CodecDuplexPipelineWithDefaults } from '@electricui/protocol-binary-codecs'
-
-const typeCache = new TypeCache()
-
-const serialProducer = new SerialPortHintProducer({
-  SerialPort,
-  baudRate: 115200,
-})
-
-const usbProducer = new USBHintProducer({
-  usb,
-})
+import { SMACPipeline } from './smac'
 
 // Serial Ports
-const serialTransportFactory = new TransportFactory(
-  (options: SerialTransportOptions) => {
-    const connectionInterface = new ConnectionInterface()
+const serialTransportFactory = new TransportFactory((options: SerialTransportOptions) => {
+  const connectionInterface = new ConnectionInterface()
 
-    const transport = new SerialTransport(options)
+  const transport = new SerialTransport(options)
 
-    const deliverabilityManager = new DeliverabilityManagerBinaryProtocol({
-      connectionInterface,
-      timeout: 1000,
-    })
+  const deliverabilityManager = new DeliverabilityManagerOneShot(connectionInterface)
 
-    const queryManager = new QueryManagerBinaryProtocol({
-      connectionInterface,
-    })
+  const queryManager = new QueryManagerNone(connectionInterface)
 
-    const cobsPipeline = new COBSPipeline()
-    const binaryPipeline = new BinaryPipeline()
-    const typeCachePipeline = new BinaryTypeCachePipeline(typeCache)
+  const connectionStaticMetadata = new ConnectionStaticMetadataReporter({
+    name: 'Serial',
+    baudRate: options.baudRate,
+    comPath: options.path,
+  })
 
-    // If you have runtime generated messageIDs, add them as an array as a second argument
-    // `name` is added because it is requested by the metadata requester before handshake.
-    const undefinedMessageIDGuard = new UndefinedMessageIDGuardPipeline(
-      typeCache,
-      ['name'],
-    )
+  const protocolPipeline = new SMACPipeline()
 
-    const codecPipeline = new CodecDuplexPipelineWithDefaults()
+  connectionInterface.setTransport(transport)
+  connectionInterface.setQueryManager(queryManager)
+  connectionInterface.setDeliverabilityManager(deliverabilityManager)
+  connectionInterface.setPipelines([protocolPipeline])
+  connectionInterface.addMetadataReporters([connectionStaticMetadata])
 
-    const customCodecs = [
-      new LEDCodec(), // Create each instance of the codecs
-    ]
-
-    // Add custom codecs.
-    codecPipeline.addCodecs(customCodecs)
-
-    const largePacketPipeline = new BinaryLargePacketHandlerPipeline({
-      connectionInterface,
-      maxPayloadLength: 100,
-    })
-
-    const connectionStaticMetadata = new ConnectionStaticMetadataReporter({
-      name: 'Serial',
-      baudRate: options.baudRate,
-    })
-
-    const heartbeatMetadata = new HeartbeatConnectionMetadataReporter({
-      interval: 500,
-      timeout: 1000,
-      // measurePipeline: true,
-    })
-
-    connectionInterface.setTransport(transport)
-    connectionInterface.setQueryManager(queryManager)
-    connectionInterface.setDeliverabilityManager(deliverabilityManager)
-    connectionInterface.setPipelines([
-      cobsPipeline,
-      binaryPipeline,
-      largePacketPipeline,
-      codecPipeline,
-      typeCachePipeline,
-      undefinedMessageIDGuard,
-    ])
-    connectionInterface.addMetadataReporters([
-      connectionStaticMetadata,
-      heartbeatMetadata,
-    ])
-
-    return connectionInterface.finalise()
-  },
-)
+  return connectionInterface.finalise()
+})
 
 const serialConsumer = new DiscoveryHintConsumer({
   factory: serialTransportFactory,
-  canConsume: (
-    hint: Hint<SerialPortHintIdentification, SerialPortHintConfiguration>,
-  ) => {
+  canConsume: (hint: Hint<SerialPortHintIdentification, SerialPortHintConfiguration>) => {
     if (hint.getTransportKey() === 'serial') {
       // If you wanted to filter for specific serial devices, you would modify this section, removing the
       // return statement below and uncommenting the block below it, modifying it to your needs.
@@ -160,8 +88,4 @@ const serialConsumer = new DiscoveryHintConsumer({
   },
 })
 
-const usbToSerialTransformer = new SerialPortUSBHintTransformer({
-  producer: serialProducer,
-})
-
-export { serialConsumer, serialProducer, usbProducer, usbToSerialTransformer }
+export { serialConsumer }

@@ -1,22 +1,10 @@
-import { Classes } from '@blueprintjs/core'
+import { Card } from '@blueprintjs/core'
 import { RouteComponentProps } from '@reach/router'
 
-import { Connections } from '@electricui/components-desktop-blueprint'
 import { Logo } from '../components/Logo'
 import { navigate } from '@electricui/utility-electron'
-import { useDeviceMetadataKey } from '@electricui/components-core'
+import { SerialPortSelector } from '../components/SerialPortSelector'
 import React from 'react'
-
-const CardInternals = () => {
-  const metadataName = useDeviceMetadataKey('name') ?? 'No name'
-
-  return (
-    <React.Fragment>
-      <h3 className={Classes.HEADING}>{metadataName}</h3>
-      <p>Device information!</p>
-    </React.Fragment>
-  )
-}
 
 export const ConnectionPage = (props: RouteComponentProps) => {
   return (
@@ -24,19 +12,16 @@ export const ConnectionPage = (props: RouteComponentProps) => {
       <div style={{ height: '100vh' }}>
         <Logo />
 
-        <Connections
-          preConnect={deviceID => navigate(`/device_loading/${deviceID}`)}
-          postHandshake={deviceID => navigate(`/devices/${deviceID}`)}
-          onFailure={(deviceID, err) => {
-            console.log('Connections component got error', err, deviceID)
-            navigate(`/`)
-          }}
+        <Card
           style={{
-            minHeight: '40vh',
-            paddingTop: '10vh',
+            maxWidth: 480,
+            margin: '10vh auto',
           }}
-          internalCardComponent={<CardInternals />}
-        />
+        >
+          <SerialPortSelector
+            onSuccess={deviceID => navigate(`/devices/${deviceID}`)}
+          />
+        </Card>
       </div>
     </React.Fragment>
   )
