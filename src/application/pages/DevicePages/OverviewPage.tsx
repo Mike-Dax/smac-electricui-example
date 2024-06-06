@@ -4,15 +4,21 @@ import {
   RealTimeDomain,
   TimeAxis,
   VerticalAxis,
+  DataSourcePrinter,
 } from '@electricui/components-desktop-charts'
 
-import { Card, Colors } from '@blueprintjs/core'
+import { Card, Colors, Intent, FormGroup } from '@blueprintjs/core'
 import { Composition } from 'atomic-layout'
 import { IntervalRequester, PollOnce } from '@electricui/components-core'
 import { useMessageDataSource } from '@electricui/core-timeseries'
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { Slider } from '@electricui/components-desktop-blueprint'
+import {
+  Slider,
+  Button,
+  Checkbox,
+  NumberInput,
+} from '@electricui/components-desktop-blueprint'
 import { Printer } from '@electricui/components-desktop'
 import { AddressFilter } from '../../components/AddressFilter'
 
@@ -38,11 +44,7 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   />
 
                   <ChartContainer>
-                    <LineChart
-                      dataSource={noiseDs}
-                      color={Colors.RED4}
-                      maxItems={50000}
-                    />
+                    <LineChart dataSource={noiseDs} color={Colors.RED4} />
                     <RealTimeDomain window={[1_000, 5_000, 10_000]} />
                     <TimeAxis />
                     <VerticalAxis />
@@ -66,6 +68,16 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   <p>
                     0xA2C00: <Printer accessor="0xA2C00" />
                   </p>
+
+                  <Button
+                    writer={state => {
+                      state['0xA2C00'] = 6
+                    }}
+                    intent={Intent.SUCCESS}
+                    fill
+                  >
+                    Button Test
+                  </Button>
                 </AddressFilter>
               </Card>
             </Areas.SectionA>
@@ -80,11 +92,7 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   />
 
                   <ChartContainer>
-                    <LineChart
-                      dataSource={noiseDs}
-                      color={Colors.GREEN4}
-                      maxItems={50000}
-                    />
+                    <LineChart dataSource={noiseDs} color={Colors.GREEN4} />
                     <RealTimeDomain window={[1_000, 5_000, 10_000]} />
                     <TimeAxis />
                     <VerticalAxis />
@@ -108,6 +116,19 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   <p>
                     0xA2C00: <Printer accessor="0xA2C00" />
                   </p>
+
+                  <FormGroup helperText="this is some helper text">
+                    <Checkbox
+                      accessor={state => state['0xA2C00']}
+                      checked={1}
+                      unchecked={0}
+                      writer={(state, value) => {
+                        state['0xA2C00'] = value
+                      }}
+                    >
+                      On Off Checkbox
+                    </Checkbox>
+                  </FormGroup>
                 </AddressFilter>
               </Card>
             </Areas.SectionB>
@@ -122,11 +143,7 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   />
 
                   <ChartContainer>
-                    <LineChart
-                      dataSource={noiseDs}
-                      color={Colors.BLUE4}
-                      maxItems={50000}
-                    />
+                    <LineChart dataSource={noiseDs} color={Colors.BLUE4} />
                     <RealTimeDomain window={[1_000, 5_000, 10_000]} />
                     <TimeAxis />
                     <VerticalAxis />
@@ -150,6 +167,15 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   <p>
                     0xA2C00: <Printer accessor="0xA2C00" />
                   </p>
+
+                  <FormGroup label="Number input example">
+                    <NumberInput
+                      accessor={state => state['0xA2C00']}
+                      writer={(state, value) => {
+                        state['0xA2C00'] = value
+                      }}
+                    />
+                  </FormGroup>
                 </AddressFilter>
               </Card>
             </Areas.SectionC>

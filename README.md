@@ -45,19 +45,72 @@ A carriage return character deliminates messages.
 
 #### In Electric UI
 
-- The `objectID` is mapped directly to the `messageID` in Electric UI. The `address` is provided as `Message` metadata and as a tag within the persistence engine.
+- The objectID / register / object index is mapped directly to the `messageID` in Electric UI.
+- The address / node number is provided as `Message` metadata and as a tag within the persistence engine.
 - By default messages are broadcast on write, and on read the latest message from any node is displayed.
 - Specific addresses can be written to and read from by using the `AddressFilter` wrapper component.
 
-## Behaviour
+Typical API usage looks like:
 
-### Connection Page
+```tsx
+export const Page = () => {
+  const noiseDs = useMessageDataSource('0x6077')
 
-The connection page allows for manual selection of the serial port and baud rate. The SerialPortSelector component is located at `./src/application/components/SerialPortSelector`.
+  return (
+    <AddressFilter address="0x01">
+      
+      {/* The 0x6077 and 0xA2C00 object IDs will be polled every 100ms from the node at 0x01 */}
+      <IntervalRequester messageIDs={['0x6077', '0xA2C00']} interval={100} />
+      
+      {/* The value of object 0x6077 at address 0x01 will be displayed */}
+      Value: <Printer accessor="0x6077" />
+      
+      {/* On click, send the value of 6 to the 0x6040 object ID */}
+      <Button
+        writer={state => {
+          state['0x6040'] = 6
+        }}
+      >
+        Button Test
+      </Button>
+      
+      {/* A checkbox that reads and writes from object ID 0xA2C00 */}
+      <Checkbox
+        accessor={state => state['0xA2C00']}
+        checked={1}
+        unchecked={0}
+        writer={(state, value) => {
+          state['0xA2C00'] = value
+        }}
+      >
+        On Off Checkbox
+      </Checkbox>
+      
+      {/* A chart that displays object 0x6077 as a red line */}
+      <ChartContainer>
+        <LineChart dataSource={noiseDs} color={Colors.RED4} />
+        <RealTimeDomain window={[1_000, 5_000, 10_000]} />
+        <TimeAxis />
+        <VerticalAxis />
+      </ChartContainer>
+      
+    </AddressFilter>
+  )
+}
+
+```
+
+## Pages and Components
 
 ### Overview Page
 
-There are three cards displayed, each with a different `AddressFilter`. Inside each is an `IntervalRequester`, `ChartContainer`, two Printers, `PollOnce` component, and a `Slider`.
+The overview page demonstrates a simple UI, showing state from three separate addresses, with a variety of components.
+
+It is editable here:
+
+ `./src/application/pages/DevicePages/OverviewPage.tsx`
+
+There are three cards displayed, each with a different `AddressFilter`. Inside each is an `IntervalRequester`, `ChartContainer`, two Printers, `PollOnce` component, a `Slider`, and an additional component.
 
 The `AddressFilter` component creates a subtree of components that can only interact with a specific node's address. Specifically, it creates an `IntervalRequester` context, `OutgoingMessageMutator`, `EventConnector` and `DomainWrapper` that isolate all incoming and outgoing messages based on the `address` prop provided.
 
@@ -66,3 +119,71 @@ The `IntervalRequester` will poll specific object IDs at a provided rate in mill
 The `ChartContainer` pulls data from the `useMessageDataSource` hook above, tagging the request with the address from the `AddressFilter` wrapper.
 
 The `PollOnce` component acts as a 'handshake', polling a value once on mount.
+
+### Adding additional pages
+
+Additional pages can be added by creating the page file, adding the page reference to the index of `DevicePages`, and modifying the header component to add a button to navigate to the page.
+
+Pages are placed in the `./src/application/pages/DevicePages/` folder, and export their page component.
+
+```tsx
+// ./src/application/pages/DevicePages/SecondaryPage.tsx
+import React from 'react'
+import { RouteComponentProps } from '@reach/router'
+import { Card } from '@blueprintjs/core'
+
+export const SecondaryPage = (props: RouteComponentProps) => {
+  return (
+    <div>
+      <Card>Other content here</Card>
+    </div>
+  )
+}
+```
+
+Pages are imported by the index and added to the route list.
+
+```tsx
+// ./src/application/pages/DevicePages/index.tsx
+import { SecondaryPage } from './SecondaryPage'
+
+// ...
+
+<Router primary={false}>
+  <OverviewPage path="/" />
+  {/* Page is added with the key 'secondary' here */}
+  <SecondaryPage path="secondary" />
+</Router>
+```
+
+Additional buttons can be added to the header component to navigate to new pages.
+
+```tsx
+// ./src/application/components/Header
+
+// ...
+
+<Button
+  minimal
+  large
+  icon={IconNames.SETTINGS}
+  text="Secondary"
+  onClick={() => {
+    // Navigate to the 'url' at the current deviceID, to the key of the page
+    navigate(`/devices/${props.deviceID}/secondary`)
+  }}
+  active={page === 'secondary'}
+/>
+```
+
+### Connection Page
+
+The connection page allows for manual selection of the serial port and baud rate. The SerialPortSelector component is located at `./src/application/components/SerialPortSelector`.
+
+## Debugging
+
+Raw packet logging can be enabled by editing the  `./src/transport-manager/config/smac.ts` file and uncommenting the `console.log` commands. After restarting the application, the logs will be displayed in the Transport Process developer tools console. (This can be enabled via the DevTools menu, via 'Toggle Developer Tools', if it doesn't open automatically.)
+
+https://github.com/Mike-Dax/smac-electricui-example/blob/1f80f353dc6e2a602eed0effb89c005605f033c0/src/transport-manager/config/smac.ts#L26
+
+https://github.com/Mike-Dax/smac-electricui-example/blob/1f80f353dc6e2a602eed0effb89c005605f033c0/src/transport-manager/config/smac.ts#L99
