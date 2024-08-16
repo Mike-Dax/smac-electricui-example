@@ -110,7 +110,7 @@ It is editable here:
 
  `./src/application/pages/DevicePages/OverviewPage.tsx`
 
-There are three cards displayed, each with a different `AddressFilter`. Inside each is an `IntervalRequester`, `ChartContainer`, two Printers, `PollOnce` component, a `Slider`, and an additional component.
+There are three cards displayed, each with a different `AddressFilter`. Inside each is an `IntervalRequester`, `ChartContainer`, two `Printer`s, `PollOnce` component, a `Slider`, and an additional component.
 
 The `AddressFilter` component creates a subtree of components that can only interact with a specific node's address. Specifically, it creates an `IntervalRequester` context, `OutgoingMessageMutator`, `EventConnector` and `DomainWrapper` that isolate all incoming and outgoing messages based on the `address` prop provided.
 
