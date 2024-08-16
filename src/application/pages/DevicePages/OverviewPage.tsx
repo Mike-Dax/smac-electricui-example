@@ -70,13 +70,24 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   </p>
 
                   <Button
-                    writer={state => {
-                      state['0xA2C00'] = 6
+                    whileMouseDownWriter={{
+                      '0x12C04': 22, // jog down macro call
                     }}
+                    interval={100} // milliseconds between repeated commands
                     intent={Intent.SUCCESS}
                     fill
                   >
-                    Button Test
+                    Jog Down 2 mm
+                  </Button>
+
+                  <Button
+                    writer={{
+                      '0x32C02': 0,
+                    }}
+                    intent={Intent.DANGER}
+                    fill
+                  >
+                    Stop Program
                   </Button>
                 </AddressFilter>
               </Card>
@@ -101,27 +112,6 @@ export const OverviewPage = (props: RouteComponentProps) => {
                   <p>
                     0x6077: <Printer accessor="0x6077" />
                   </p>
-
-                  <Button
-                    whileMouseDownWriter={{
-                      '0x12C04': 22, // jog down macro call
-                    }}
-                    interval={100} // milliseconds between repeated commands
-                    intent={Intent.SUCCESS}
-                    fill
-                  >
-                    Jog Down 2 mm
-                  </Button>
-
-                  <Button
-                    writer={{
-                      '0x32C02': 0,
-                    }}
-                    intent={Intent.DANGER}
-                    fill
-                  >
-                    Stop Program
-                  </Button>
 
                   <PollOnce messageID="0xA2C00" />
                   <Slider
