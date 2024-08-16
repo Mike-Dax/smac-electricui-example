@@ -23,7 +23,8 @@ export class SMACDecoderPipeline extends Pipeline {
     // Attempt a packet decode
     const str = packet.toString('ascii').trim()
 
-    // console.log(`decoding`, str)
+    // Print incoming message from hardware
+    console.log(`< ${str}`)
 
     const split = str.split(' ')
     const address = split[0]
@@ -96,11 +97,13 @@ export class SMACEncoderPipeline extends Pipeline {
     // Encode the packet via string manipulation
     const packet = `${address} ${messageType} ${objectID}${payload}${carriageReturn}`
 
-    // console.log(`writing packet ${packet}`)
+    // Print outgoing message to console
+    console.log(`> ${packet}`)
 
     return this.push(packet, cancellationToken)
   }
 }
+
 
 /**
  * The duplex pipeline combines the encoder and decoder.
