@@ -1,19 +1,19 @@
 import 'source-map-support/register'
 
-import { deviceManager } from './config'
 import { setupProxyAndDebugInterface } from '@electricui/components-desktop-blueprint'
-import { setupTransportWindow } from '@electricui/utility-electron'
 import {
   ElectronIPCRemoteQueryExecutor,
   MultiPersistenceEngineMemory,
   QueryableMessageIDProvider,
 } from '@electricui/core-timeseries'
+import { setupTransportWindow } from '@electricui/utility-electron'
+import { deviceManager } from './config'
 
 import './styles.css'
 
 import { FocusStyleManager } from '@blueprintjs/core'
-import { SMACMessageMetadata } from './config/smac'
 import { Message } from '@electricui/core'
+import { SMACMessageMetadata } from './config/smac'
 FocusStyleManager.onlyShowFocusOnTabs()
 
 const root = document.createElement('div')

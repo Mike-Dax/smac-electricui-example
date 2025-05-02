@@ -121,7 +121,7 @@ app.on('ready', () => {
   const firstWindow = createMainWindow()
   mainWindows.push(firstWindow) // add a new window
 
-  const firstWindowReady = new Deferred()
+  const firstWindowReady = new Deferred<void>()
   firstWindow.once('ready-to-show', firstWindowReady.resolve)
 
   // Wait until the transport and the window is ready before showing the first window
